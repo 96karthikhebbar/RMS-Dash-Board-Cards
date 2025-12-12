@@ -1,0 +1,57 @@
+name: Build and Deploy Vite App to GitHub Pages (Pages API - Node 20.19)
+
+# Trigger on push to main (change branch if needed) and allow manual runs
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    environment: github-pages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20.19.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.0'   # ⬅️ upgraded to satisfy Vite's requirement
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Vite)
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      # ------------ Pages API steps (official actions, artifact v4 compatible) ------------
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifact (dist)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # For Vite, the build output is usually ./dist
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
+      # optional: create CNAME file in artifact (uncomment and edit to use)
+      # - name: Add CNAME (optional)
+      #   run: echo 'www.example.com' > dist/CNAME
+      #   if: always()

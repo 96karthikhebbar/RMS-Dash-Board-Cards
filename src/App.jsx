@@ -1,6 +1,7 @@
 import React from 'react';
-import StatsCards from './StatsCards';
+import StatsCards from './StatCards/CardsLayout';
 import { statsConfig } from './data';
+import './index.css'
 
 export default function App() {
   return (
